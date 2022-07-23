@@ -21,42 +21,45 @@ else
   echo "Using cstor organization: ${CSTOR_ORG}"
 fi
 
+pwd
 
 # enable gtest for builds
 cd /usr/src/gtest && \
     cmake -DBUILD_SHARED_LIBS=ON CMakeLists.txt && \
     make && \
     cp *.so /usr/lib && \
-    cd /libcstor
+    cd /vcns/libcstor
 
 # clone cstor repo for required library files
 git clone https://github.com/$CSTOR_ORG/cstor.git && \
     cd cstor && \
-    git checkout develop && \
+    git checkout dev && \
     cd .. 
 
 # build libcstor 
+cd libcstor
 sh autogen.sh && \
-    ./configure --with-zfs-headers="$PWD"/cstor/include --with-spl-headers="$PWD"/cstor/lib/libspl/include  && \
+    ./configure --with-zfs-headers="$PWD"/../cstor/include --with-spl-headers="$PWD"/../cstor/lib/libspl/include  && \
     make -j"$(nproc)" && \
     make install && \
     ldconfig
 
 # build cstor
-cd cstor && \
+cd /vcns/cstor && \
     sh autogen.sh && \
-    ./configure --enable-uzfs=yes --with-config=user --with-jemalloc --with-libcstor="$PWD"/../include && \
+    ./configure --enable-uzfs=yes --with-config=user --with-jemalloc --with-libcstor="$PWD"/../libcstor/include && \
     make clean && \
     make -j"$(nproc)" && \
-    cd /libcstor
+    cd /vcns/libcstor
 
 # build zrepl
 cd cmd/zrepl && \
     make clean && \
     make && \
-    cd /libcstor
+    cd /vcns/libcstor
 
 # copy all the build files
 mkdir -p ./docker/zfs/bin ./docker/zfs/lib
-cp cmd/zrepl/.libs/zrepl cstor/cmd/zpool/.libs/zpool cstor/cmd/zfs/.libs/zfs cstor/cmd/zstreamdump/.libs/zstreamdump ./docker/zfs/bin
-cp cstor/lib/libzpool/.libs/*.so* cstor/lib/libuutil/.libs/*.so* cstor/lib/libnvpair/.libs/*.so* cstor/lib/libzfs/.libs/*.so* cstor/lib/libzfs_core/.libs/*.so* src/.libs/*.so* ./docker/zfs/lib
+cp cmd/zrepl/.libs/zrepl ../cstor/cmd/zpool/.libs/zpool ../cstor/cmd/zfs/.libs/zfs ../cstor/cmd/zstreamdump/.libs/zstreamdump ./docker/zfs/bin
+cp ../cstor/lib/libzpool/.libs/*.so* ../cstor/lib/libuutil/.libs/*.so* ../cstor/lib/libnvpair/.libs/*.so* ../cstor/lib/libzfs/.libs/*.so* ../cstor/lib/libzfs_core/.libs/*.so* src/.libs/*.so* ./docker/zfs/lib
+cp /usr/src/gtest/*.so ./docker/zfs/lib/

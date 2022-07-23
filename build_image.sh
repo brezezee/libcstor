@@ -77,7 +77,11 @@ if [ -z "${DBUILD_SITE_URL}" ]; then
   DBUILD_SITE_URL="https://openebs.io"
 fi
 
-DBUILD_ARGS="--build-arg DBUILD_DATE=${DBUILD_DATE} --build-arg DBUILD_REPO_URL=${DBUILD_REPO_URL} --build-arg DBUILD_SITE_URL=${DBUILD_SITE_URL} --build-arg ARCH=${ARCH}"
+if [ -z "${CSTOR_ORG}" ]; then
+  CSTOR_ORG="brezezee"
+fi
+
+DBUILD_ARGS="--build-arg CSTOR_ORG=${CSTOR_ORG} --build-arg DBUILD_DATE=${DBUILD_DATE} --build-arg DBUILD_REPO_URL=${DBUILD_REPO_URL} --build-arg DBUILD_SITE_URL=${DBUILD_SITE_URL} --build-arg ARCH=${ARCH}"
 
 
 if [ "${ARCH}" = "x86_64" ]; then

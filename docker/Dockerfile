@@ -16,7 +16,7 @@
 # This Dockerfile builds cstor main container running zrepl from base image
 #
 
-FROM openebs/cstor-base:ci
+FROM openebs/cstor-base-amd64:ci
 
 COPY entrypoint-poolimage.sh /usr/local/bin/
 
